@@ -1,0 +1,35 @@
+{
+  "name": "origem-adapters",
+  "version": "0.1.0",
+  "description": "Traduz um Brain do Origem para o formato de config de cada IA (AGENTS.md, CLAUDE.md, .cursor/rules, .mcp.json…) e aplica no repo com merge seguro. Inclui a CLI origem-apply.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": { "origem-apply": "dist/cli.js" },
+  "files": ["dist"],
+  "keywords": [
+    "origem",
+    "ai",
+    "agents",
+    "claude",
+    "cursor",
+    "copilot",
+    "gemini",
+    "mcp",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "config"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node test/run.mjs",
+    "prepublishOnly": "npm run test"
+  },
+  "engines": { "node": ">=18" },
+  "publishConfig": { "access": "public" },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.10.0"
+  }
+}
