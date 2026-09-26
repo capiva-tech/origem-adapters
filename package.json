@@ -5,8 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": { "origem-apply": "dist/cli.js" },
-  "files": ["dist"],
+  "bin": {
+    "origem-apply": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
   "keywords": [
     "origem",
     "ai",
@@ -24,10 +28,15 @@
   "scripts": {
     "build": "tsc",
     "test": "npm run build && node test/run.mjs",
-    "prepublishOnly": "npm run test"
+    "prepublishOnly": "npm run test",
+    "test:e2e": "npm run build && node test/e2e/run-all.mjs"
   },
-  "engines": { "node": ">=18" },
-  "publishConfig": { "access": "public" },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "typescript": "^5.7.0",
     "@types/node": "^22.10.0"

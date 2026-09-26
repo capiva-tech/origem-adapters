@@ -1,0 +1,48 @@
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  build-and-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: .
+      - run: npm run build
+        working-directory: .
+      - name: npm audit (production deps, critical fails the build)
+        run: npm audit --omit=dev --audit-level=critical
+        working-directory: .
+      - name: Secret scan (verified secrets fail the build)
+        uses: trufflesecurity/trufflehog@v3.88.0
+        with:
+          extra_args: --only-verified
+  e2e:
+    # Runs only when the repository variable ORIGEM_E2E_ENABLED is "true" and the
+    # e2e test-account secrets exist (see README, e2e section).
+    if: ${{ vars.ORIGEM_E2E_ENABLED == 'true' }}
+    needs: build-and-audit
+    runs-on: ubuntu-latest
+    env:
+      ORIGEM_E2E_EMAIL: ${{ secrets.ORIGEM_E2E_EMAIL }}
+      ORIGEM_E2E_PASSWORD: ${{ secrets.ORIGEM_E2E_PASSWORD }}
+      ORIGEM_E2E_MEMBER_EMAIL: ${{ secrets.ORIGEM_E2E_MEMBER_EMAIL }}
+      ORIGEM_E2E_MEMBER_PASSWORD: ${{ secrets.ORIGEM_E2E_MEMBER_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+        working-directory: .
+      - run: npm run test:e2e
+        working-directory: .
