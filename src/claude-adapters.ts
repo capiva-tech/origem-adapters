@@ -60,6 +60,25 @@ export function toClaudeSettings(brain: BrainExport): OutputFile[] {
 }
 
 /**
+ * Skill, comando e subagente viram instrução que o agente segue — e alguns
+ * recursos deles EXECUTAM ou ampliam permissões sem novo prompt: hooks,
+ * permissionMode, mcpServers, allowed-tools no frontmatter, e linhas que o
+ * Claude Code roda como comando ao carregar a peça ("!" seguido de crase).
+ * Esses arquivos passam a ser "privileged": só são gravados com confirmação
+ * (ou --allow-privileged), igual a settings.json e MCP stdio. Os demais seguem
+ * "safe".
+ */
+const EXEC_KEYS = /^(hooks|permissionMode|mcpServers|allowed-tools|allowedTools)\s*:/m;
+const EXEC_LINE = /^\s*!`/m;
+
+export function pieceRisk(content: string): "safe" | "privileged" {
+  const fm = /^---\s*\n([\s\S]*?)\n---/.exec(content.trimStart());
+  if (fm && EXEC_KEYS.test(fm[1])) return "privileged";
+  if (EXEC_LINE.test(content)) return "privileged";
+  return "safe";
+}
+
+/**
  * .claude/skills/<nome>/SKILL.md — um card `skill` vira uma Agent Skill.
  * Se o content já tiver frontmatter, é respeitado; senão geramos a partir de título/tags.
  */
@@ -83,7 +102,7 @@ export function toClaudeSkills(brain: BrainExport): OutputFile[] {
       target: "claude-skills" as const,
       path: `.claude/skills/${slug}/SKILL.md`,
       content,
-      risk: "safe" as const,
+      risk: pieceRisk(content),
       strategy: "whole-file" as const,
     };
   });
@@ -110,7 +129,7 @@ export function toClaudeCommands(brain: BrainExport): OutputFile[] {
       target: "claude-commands" as const,
       path: `.claude/commands/${slug}.md`,
       content,
-      risk: "safe" as const,
+      risk: pieceRisk(content),
       strategy: "whole-file" as const,
     };
   });
@@ -155,7 +174,7 @@ export function toClaudeAgents(brain: BrainExport): OutputFile[] {
       target: "claude-agents" as const,
       path: `.claude/agents/${slug}.md`,
       content,
-      risk: "safe" as const,
+      risk: pieceRisk(content),
       strategy: "whole-file" as const,
     };
   });
